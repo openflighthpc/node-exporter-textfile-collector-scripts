@@ -26,7 +26,7 @@ while read line ; do
 
 	# Check GRES output matches expected format for gpu
 	# gpu:<ident>:<amount>
-	gres_regex=".*?gpu:(.*):([0-9]).*?"
+	gres_regex=".*gpu:([^:]*):([0-9]*).*"
 
 	if [[ "$gres" =~ $gres_regex ]] ; then
 
@@ -34,7 +34,7 @@ while read line ; do
 		amount="${BASH_REMATCH[2]}"
 
 		# Check GRES used output matches expected format for gpu
-		used_regex=".*?gpu:$ident:([0-9]*).*?"
+		used_regex=".*gpu:$ident:([0-9]*).*"
 
 		if [[ "$gres_used" =~ $used_regex ]] ; then
 			used="${BASH_REMATCH[1]}"
