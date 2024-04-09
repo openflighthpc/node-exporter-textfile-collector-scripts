@@ -28,6 +28,9 @@ while read line ; do
 	# gpu:<ident>:<amount>
 	gres_regex=".*gpu:([^:]*):([0-9]*).*"
 
+	# Fall back regex for schedulers without multiple GPUs / gpu ident
+	gres_regex_fallback=".*gpu:([0-9]*).*"
+
 	if [[ "$gres" =~ $gres_regex ]] ; then
 
 		ident="${BASH_REMATCH[1]}"
@@ -39,6 +42,18 @@ while read line ; do
 		if [[ "$gres_used" =~ $used_regex ]] ; then
 			used="${BASH_REMATCH[1]}"
 
+			echo "slurm_node_gpu_total{node=\"${node}\", gres=\"$ident\", status=\"${state}\"} ${amount}" >> ${OUTPUT}
+			echo "slurm_node_gpu_alloc{node=\"${node}\", gres=\"$ident\", status=\"${state}\"} ${used}" >> ${OUTPUT}
+		fi
+
+	elif [[ "$gres" =~ $gres_regex_fallback ]] ; then
+		ident="gpu"
+		amount="${BASH_REMATCH[1]}"
+
+		used_regex=".*gpu:([0-9]*).*"
+
+		if [[ "$gres_used" =~ $used_regex ]] ; then
+			used="${BASH_REMATCH[1]}"
 			echo "slurm_node_gpu_total{node=\"${node}\", gres=\"$ident\", status=\"${state}\"} ${amount}" >> ${OUTPUT}
 			echo "slurm_node_gpu_alloc{node=\"${node}\", gres=\"$ident\", status=\"${state}\"} ${used}" >> ${OUTPUT}
 		fi
