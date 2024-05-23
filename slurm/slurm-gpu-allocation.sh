@@ -7,12 +7,15 @@
 # Node exporter textfile collector directory
 COLLECTOR="/opt/node-exporter/textfile-collector"
 
+# Slurm bin path
+SLURM_PATH="/usr/bin"
+
 # Create output file
 OUTPUT="${COLLECTOR}/slurm-gpu-allocation.$$"
 touch ${OUTPUT}
 
 # Parse sinfo output to collect total GPUs
-sinfo_output=$(/usr/bin/sinfo -a --Format=NodeHost:40,Gres:40,GresUsed:40,StateLong:40 -h 2>/dev/null)
+sinfo_output=$(${SLURM_PATH}/sinfo -a --Format=NodeHost:40,Gres:40,GresUsed:40,StateLong:40 -h 2>/dev/null)
 
 while read line ; do
 	node=$(echo "$line" | awk '{print $1}' | xargs)

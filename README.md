@@ -9,7 +9,8 @@ A collection of scripts to expose additional metrics via the Node Exporter Textf
 ## Usage
 - Install the scripts you wish to use to a suitable directory on the node.
 - Update the scripts to set the output directory variable `COLLECTOR` to the directory `node-exporter` has been configured to use for the textfile collector (`--collector.textfile.directory`).
-- Add a crontab entry to run the script(s) at the desired interval.
+- If you have installed Slurm in a non-standard location, update the `SLURM_PATH` variable to the correct directory.
+- Add a crontab entry to run the script(s) at the desired interval. It is recommended this is set to the same interval as your Prometheus scrape interval.
 
 For example:
 ```
