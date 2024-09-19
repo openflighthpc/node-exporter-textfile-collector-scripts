@@ -76,4 +76,4 @@ do
 done
 
 # Rename output file to .prom file for node exporter
-mv ${OUTPUT} ${COLLECTOR}/user-storage-quota.prom
+mv ${OUTPUT} ${COLLECTOR}/user-lustre-storage-quota.prom
