@@ -37,8 +37,9 @@ do
 
 	for user in $user_list
 	do
-    		quota_output=$(${LFS} quota -u ${user} ${mount_path} | tail -n +3| head -1)
+    		quota_output=$(${LFS} quota -u ${user} ${mount_path} 2> /dev/null | tail -n +3| head -1)
 		#echo $quota_output
+		if [[ -z "$quota_output" ]] ; then break ; fi
 
 		kbs_used=$(echo "$quota_output" | awk '{print $2}' | xargs)
 		block_quota=$(echo "$quota_output" | awk '{print $3}' | xargs)
@@ -75,4 +76,4 @@ do
 done
 
 # Rename output file to .prom file for node exporter
-mv ${OUTPUT} ${COLLECTOR}/user-lustre-storage-quota.prom
+mv ${OUTPUT} ${COLLECTOR}/user-storage-quota.prom
