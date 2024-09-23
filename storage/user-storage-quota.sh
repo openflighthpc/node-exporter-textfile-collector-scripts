@@ -29,7 +29,55 @@ function get_user_list()
     echo $user_list
 }
 
+function calculate_seconds()
+{
+    time_period="$1"
+    regex_pattern="^([0-9]+d)?([0-9]+h)?([0-9]+m)?([0-9]+s)?$"
+    total_time_in_seconds=0
+    if [[ $time_period =~ $regex_pattern ]]
+    then
+            for match in ${BASH_REMATCH[@]:1}
+            do
 
+                    case "${match: -1}" in
+
+                    'd' )
+
+                            total_time_in_seconds=$(($total_time_in_seconds + ${match:0:-1} * 86400))
+
+                            ;;
+
+                    'h' )
+
+                            total_time_in_seconds=$(($total_time_in_seconds + ${match:0:-1} * 3600))
+
+                            ;;
+
+                    'm' )
+
+                            total_time_in_seconds=$(($total_time_in_seconds + ${match:0:-1} * 60))
+
+                            ;;
+
+                    's' )
+
+                            total_time_in_seconds=$(($total_time_in_seconds + ${match:0:-1}))
+
+                            ;;
+
+                    *)
+
+                            ;;
+                    esac
+            done
+
+    echo $total_time_in_seconds
+
+    else
+        echo $time_period
+    fi
+
+}
 
 function get_quota()
 {
@@ -50,6 +98,7 @@ function get_quota()
 		blocks_quota=$(echo "$quota_output" | awk '{print $3}' | xargs)
 		blocks_limit=$(echo "$quota_output" | awk '{print $4}' | xargs)
 		blocks_grace=$(echo "$quota_output" | awk '{print $5}' | xargs)
+
 		files_used=$(echo "$quota_output" | awk '{print $6}' | xargs)
 		files_quota=$(echo "$quota_output" | awk '{print $7}' | xargs)
 		files_limit=$(echo "$quota_output" | awk '{print $8}' | xargs)
@@ -95,10 +144,14 @@ function get_lustre_quota()
 
 		if [[ $blocks_grace == "-" ]]; then
 			blocks_grace=0
+		else
+			blocks_grace=$(calculate_seconds ${blocks_grace})
 		fi
 
 		if [[ $files_grace == "-" ]]; then
 			files_grace=0
+		else
+			files_grace=$(calculate_seconds ${files_grace})
 		fi
 
 		echo "node_user_storage_quota_blocks_used{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $kbs_used >> ${OUTPUT}
