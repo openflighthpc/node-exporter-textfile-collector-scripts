@@ -99,10 +99,20 @@ function get_quota()
 		blocks_limit=$(echo "$quota_output" | awk '{print $4}' | xargs)
 		blocks_grace=$(echo "$quota_output" | awk '{print $5}' | xargs)
 
+		if [[ "$blocks_grace" > 0 ]]
+		then
+			blocks_grace=$(($blocks_grace - `date +%s`))
+		fi
+
 		files_used=$(echo "$quota_output" | awk '{print $6}' | tr -d '*' | xargs)
 		files_quota=$(echo "$quota_output" | awk '{print $7}' | xargs)
 		files_limit=$(echo "$quota_output" | awk '{print $8}' | xargs)
 		files_grace=$(echo "$quota_output" | awk '{print $9}' | xargs)
+
+		if [[ "$files_grace" > 0 ]]
+                then
+			files_grace=$(($files_grace - `date +%s`))
+                fi
 
 		echo "node_user_storage_quota_blocks_used{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $blocks_used >> ${OUTPUT}
 		echo "node_user_storage_quota_blocks_quota{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $blocks_quota >> ${OUTPUT}
