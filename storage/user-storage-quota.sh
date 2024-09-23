@@ -5,10 +5,6 @@
 # Node exporter textfile collector directory
 COLLECTOR="/opt/node-exporter/textfile-collector"
 
-# Create output file
-OUTPUT="${COLLECTOR}/user-storage-quota.$$"
-touch ${OUTPUT}
-
 
 QUOTA=/usr/bin/quota
 LFS=/usr/bin/lfs
@@ -59,24 +55,21 @@ function get_quota()
 		files_limit=$(echo "$quota_output" | awk '{print $8}' | xargs)
 		files_grace=$(echo "$quota_output" | awk '{print $9}' | xargs)
 
-		if [[ $blocks_grace == "0" ]]; then
-			blocks_grace=0
-		else
-			blocks_grace=1
-		fi
+		echo "node_user_storage_quota_blocks_used{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $blocks_used >> ${OUTPUT}
+		echo "node_user_storage_quota_blocks_quota{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $blocks_quota >> ${OUTPUT}
+		echo "node_user_storage_quota_blocks_limit{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $blocks_limit >> ${OUTPUT}
+		echo "node_user_storage_quota_blocks_grace{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $blocks_grace >> ${OUTPUT}
 
-		if [[ $files_grace == "0" ]]; then
-			files_grace=0
-        	else
-			files_grace=1
-		fi
 
-		echo "node_user_storage_quota{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\", blocks_used=\"${blocks_used}\", blocks_quota=\"${blocks_quota}\", blocks_limit=\"${blocks_quota}\", blocks_grace=\"${blocks_grace}\", files_used=\"${files_used}\", files_quota=\"${files_quota}\", files_limit=\"${files_limit}\", files_grace=\"${files_grace}\"}" 0 >>${OUTPUT}
+		echo "node_user_storage_quota_files_used{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $files_used >> ${OUTPUT}
+		echo "node_user_storage_quota_files_quota{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $files_quota >> ${OUTPUT}
+		echo "node_user_storage_quota_files_limit{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $files_limit >> ${OUTPUT}
+		echo "node_user_storage_quota_files_grace{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $files_grace >> ${OUTPUT}
 
 	done < <(echo "$quota_output")
     done
     # Rename output file to .prom file for node exporter
-    mv ${OUTPUT} ${COLLECTOR}/user-storage-quota.prom
+    mv ${OUTPUT} ${COLLECTOR}/quota-${MOUNT_PATH//\//$'-'}.prom
 
 }
 
@@ -100,24 +93,30 @@ function get_lustre_quota()
 		files_limit=$(echo "$quota_output" | awk '{print $8}' | xargs)
 		files_grace=$(echo "$quota_output" | awk '{print $9}' | xargs)
 
-		if [[ $block_grace == "-" ]]; then
-			block_grace=0
-		else
-			block_grace=1
+		if [[ $blocks_grace == "-" ]]; then
+			blocks_grace=0
 		fi
 
 		if [[ $files_grace == "-" ]]; then
 			files_grace=0
-        	else
-			files_grace=1
 		fi
 
-		echo "node_user_storage_quota{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\", kbs_used=\"${kbs_used}\", blocks_quota=\"${blocks_quota}\", blocks_limit=\"${blocks_quota}\", blocks_grace=\"${blocks_grace}\", files_used=\"${files_used}\", files_quota=\"${files_quota}\", files_limit=\"${files_limit}\", files_grace=\"${files_grace}\"}" 0 >>${OUTPUT}
+		echo "node_user_storage_quota_blocks_used{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $kbs_used >> ${OUTPUT}
+                echo "node_user_storage_quota_blocks_quota{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $blocks_quota >> ${OUTPUT}
+                echo "node_user_storage_quota_blocks_limit{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $blocks_limit >> ${OUTPUT}
+                echo "node_user_storage_quota_blocks_grace{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $blocks_grace >> ${OUTPUT}
+
+
+                echo "node_user_storage_quota_files_used{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $files_used >> ${OUTPUT}
+                echo "node_user_storage_quota_files_quota{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $files_quota >> ${OUTPUT}
+                echo "node_user_storage_quota_files_limit{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $files_limit >> ${OUTPUT}
+                echo "node_user_storage_quota_files_grace{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $files_grace >> ${OUTPUT}
+
 
 	done
- 
+
  	# Rename output file to .prom file for node exporter
-    	mv ${OUTPUT} ${COLLECTOR}/user-storage-quota.prom
+    	mv ${OUTPUT} ${COLLECTOR}/quota-${MOUNT_PATH//\//$'-'}.prom
 }
 
 
@@ -172,6 +171,10 @@ do
   esac
 done
 
+
+# Create output file
+OUTPUT="${COLLECTOR}/quota-${MOUNT_PATH//\//$'-'}.$$"
+touch ${OUTPUT}
 
 case "$FS_TYPE" in
     "xfs" | "ext4" | "nfs" )
