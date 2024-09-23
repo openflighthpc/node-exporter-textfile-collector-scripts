@@ -94,12 +94,12 @@ function get_quota()
 
 		if [[ "$MOUNT_PATH" != "$target" ]] ; then continue ; fi
 
-		blocks_used=$(echo "$quota_output" | awk '{print $2}' | xargs)
+		blocks_used=$(echo "$quota_output" | awk '{print $2}' | tr -d '*' | xargs)
 		blocks_quota=$(echo "$quota_output" | awk '{print $3}' | xargs)
 		blocks_limit=$(echo "$quota_output" | awk '{print $4}' | xargs)
 		blocks_grace=$(echo "$quota_output" | awk '{print $5}' | xargs)
 
-		files_used=$(echo "$quota_output" | awk '{print $6}' | xargs)
+		files_used=$(echo "$quota_output" | awk '{print $6}' | tr -d '*' | xargs)
 		files_quota=$(echo "$quota_output" | awk '{print $7}' | xargs)
 		files_limit=$(echo "$quota_output" | awk '{print $8}' | xargs)
 		files_grace=$(echo "$quota_output" | awk '{print $9}' | xargs)
@@ -118,7 +118,7 @@ function get_quota()
 	done < <(echo "$quota_output")
     done
     # Rename output file to .prom file for node exporter
-    mv ${OUTPUT} ${COLLECTOR}/quota-${MOUNT_PATH//\//$'-'}.prom
+    mv ${OUTPUT} ${COLLECTOR}/quota${MOUNT_PATH//\//$'-'}.prom
 
 }
 
@@ -133,11 +133,11 @@ function get_lustre_quota()
 
 		if [[ -z "$quota_output" ]] ; then break ; fi
 
-		kbs_used=$(echo "$quota_output" | awk '{print $2}' | xargs)
+		kbs_used=$(echo "$quota_output" | awk '{print $2}' | tr -d '*' | xargs)
 		blocks_quota=$(echo "$quota_output" | awk '{print $3}' | xargs)
 		blocks_limit=$(echo "$quota_output" | awk '{print $4}' | xargs)
 		blocks_grace=$(echo "$quota_output" | awk '{print $5}' | xargs)
-		files_used=$(echo "$quota_output" | awk '{print $6}' | xargs)
+		files_used=$(echo "$quota_output" | awk '{print $6}' | tr -d '*' | xargs)
 		files_quota=$(echo "$quota_output" | awk '{print $7}' | xargs)
 		files_limit=$(echo "$quota_output" | awk '{print $8}' | xargs)
 		files_grace=$(echo "$quota_output" | awk '{print $9}' | xargs)
@@ -169,7 +169,7 @@ function get_lustre_quota()
 	done
 
  	# Rename output file to .prom file for node exporter
-    	mv ${OUTPUT} ${COLLECTOR}/quota-${MOUNT_PATH//\//$'-'}.prom
+    	mv ${OUTPUT} ${COLLECTOR}/quota${MOUNT_PATH//\//$'-'}.prom
 }
 
 
@@ -226,7 +226,7 @@ done
 
 
 # Create output file
-OUTPUT="${COLLECTOR}/quota-${MOUNT_PATH//\//$'-'}.$$"
+OUTPUT="${COLLECTOR}/quota${MOUNT_PATH//\//$'-'}.$$"
 touch ${OUTPUT}
 
 case "$FS_TYPE" in
