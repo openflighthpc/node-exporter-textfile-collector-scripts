@@ -115,6 +115,9 @@ function get_lustre_quota()
 		echo "node_user_storage_quota{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\", blocks_used=\"${blocks_used}\", blocks_quota=\"${blocks_quota}\", blocks_limit=\"${blocks_quota}\", blocks_grace=\"${blocks_grace}\", files_used=\"${files_used}\", files_quota=\"${files_quota}\", files_limit=\"${files_limit}\", files_grace=\"${files_grace}\"}" 0 >>${OUTPUT}
 
 	done
+ 
+ 	# Rename output file to .prom file for node exporter
+    	mv ${OUTPUT} ${COLLECTOR}/user-storage-quota.prom
 }
 
 
