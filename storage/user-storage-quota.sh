@@ -112,7 +112,7 @@ function get_lustre_quota()
 			files_grace=1
 		fi
 
-		echo "node_user_storage_quota{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\", blocks_used=\"${blocks_used}\", blocks_quota=\"${blocks_quota}\", blocks_limit=\"${blocks_quota}\", blocks_grace=\"${blocks_grace}\", files_used=\"${files_used}\", files_quota=\"${files_quota}\", files_limit=\"${files_limit}\", files_grace=\"${files_grace}\"}" 0 >>${OUTPUT}
+		echo "node_user_storage_quota{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\", kbs_used=\"${kbs_used}\", blocks_quota=\"${blocks_quota}\", blocks_limit=\"${blocks_quota}\", blocks_grace=\"${blocks_grace}\", files_used=\"${files_used}\", files_quota=\"${files_quota}\", files_limit=\"${files_limit}\", files_grace=\"${files_grace}\"}" 0 >>${OUTPUT}
 
 	done
  
