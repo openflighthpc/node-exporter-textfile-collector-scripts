@@ -90,24 +90,24 @@ function get_quota()
 	while read line
 	do
 
-		target=$(echo "$quota_output" | awk '{print $1}' | xargs)
+		target=$(echo "$line" | awk '{print $1}' | xargs)
 
 		if [[ "$MOUNT_PATH" != "$target" ]] ; then continue ; fi
 
-		blocks_used=$(echo "$quota_output" | awk '{print $2}' | tr -d '*' | xargs)
-		blocks_quota=$(echo "$quota_output" | awk '{print $3}' | xargs)
-		blocks_limit=$(echo "$quota_output" | awk '{print $4}' | xargs)
-		blocks_grace=$(echo "$quota_output" | awk '{print $5}' | xargs)
+		blocks_used=$(echo "$line" | awk '{print $2}' | tr -d '*' | xargs)
+		blocks_quota=$(echo "$line" | awk '{print $3}' | xargs)
+		blocks_limit=$(echo "$line" | awk '{print $4}' | xargs)
+		blocks_grace=$(echo "$line" | awk '{print $5}' | xargs)
 
 		if [[ "$blocks_grace" > 0 ]]
 		then
 			blocks_grace=$(($blocks_grace - `date +%s`))
 		fi
 
-		files_used=$(echo "$quota_output" | awk '{print $6}' | tr -d '*' | xargs)
-		files_quota=$(echo "$quota_output" | awk '{print $7}' | xargs)
-		files_limit=$(echo "$quota_output" | awk '{print $8}' | xargs)
-		files_grace=$(echo "$quota_output" | awk '{print $9}' | xargs)
+		files_used=$(echo "$line" | awk '{print $6}' | tr -d '*' | xargs)
+		files_quota=$(echo "$line" | awk '{print $7}' | xargs)
+		files_limit=$(echo "$line" | awk '{print $8}' | xargs)
+		files_grace=$(echo "$line" | awk '{print $9}' | xargs)
 
 		if [[ "$files_grace" > 0 ]]
                 then
