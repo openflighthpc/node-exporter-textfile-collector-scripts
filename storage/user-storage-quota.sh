@@ -176,6 +176,14 @@ function get_lustre_quota()
 			files_grace=$(calculate_seconds ${files_grace})
 		fi
 
+		if [[ $blocks_grace == "none" ]] ; then
+			blocks_grace=-1
+		fi
+
+		if [[ $files_grace == "none" ]] ; then
+			files_grace=-1
+		fi
+
 		echo "node_user_storage_quota_blocks_used{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $kbs_used >> ${OUTPUT}
                 echo "node_user_storage_quota_blocks_quota{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $blocks_quota >> ${OUTPUT}
                 echo "node_user_storage_quota_blocks_limit{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $blocks_limit >> ${OUTPUT}
