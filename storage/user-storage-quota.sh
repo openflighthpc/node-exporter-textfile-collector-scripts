@@ -84,8 +84,20 @@ function get_quota()
     user_list=$(get_user_list)
     for user in $user_list
     do
-        quota_output=$(${QUOTA} -v --raw-grace --user ${user} --show-mntpoint --hide-device 2> /dev/null | grep ${MOUNT_PATH} )
-	if [[ -z "$quota_output" ]] ; then continue ; fi
+	quota_output=""
+
+	# For numeric only usernames, convert to uid first
+        if [[ "$user" =~ ^[0-9]+$ ]] ; then
+                uid=$(id -u ${user} 2>/dev/null)
+
+                if [[ -z "$uid" ]] ; then continue ; fi
+
+                quota_output=$(${QUOTA} -v --raw-grace --user ${uid} --show-mntpoint --hide-device 2> /dev/null | grep ${MOUNT_PATH})   
+        else
+                quota_output=$(${QUOTA} -v --raw-grace --user ${user} --show-mntpoint --hide-device 2> /dev/null | grep ${MOUNT_PATH})
+        fi
+
+        if [[ -z "$quota_output" ]] ; then continue ; fi
 
 	while read line
 	do
