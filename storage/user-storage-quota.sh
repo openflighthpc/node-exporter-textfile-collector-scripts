@@ -141,7 +141,7 @@ function get_lustre_quota()
 	do
         quota_output=$(${LFS} quota -u ${user} ${MOUNT_PATH} 2> /dev/null | tail -n +3| head -1)
 
-		if [[ -z "$quota_output" ]] ; then break ; fi
+		if [[ -z "$quota_output" ]] ; then continue ; fi
 
 		kbs_used=$(echo "$quota_output" | awk '{print $2}' | tr -d '*' | xargs)
 		blocks_quota=$(echo "$quota_output" | awk '{print $3}' | xargs)
