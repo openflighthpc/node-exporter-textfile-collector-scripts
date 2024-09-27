@@ -84,8 +84,20 @@ function get_quota()
     user_list=$(get_user_list)
     for user in $user_list
     do
-        quota_output=$(${QUOTA} -v --raw-grace --user ${user} --show-mntpoint --hide-device 2> /dev/null | grep ${MOUNT_PATH} )
-	if [[ -z "$quota_output" ]] ; then continue ; fi
+	quota_output=""
+
+	# For numeric only usernames, convert to uid first
+        if [[ "$user" =~ ^[0-9]+$ ]] ; then
+                uid=$(id -u ${user} 2>/dev/null)
+
+                if [[ -z "$uid" ]] ; then continue ; fi
+
+                quota_output=$(${QUOTA} -v --raw-grace --user ${uid} --show-mntpoint --hide-device 2> /dev/null | grep ${MOUNT_PATH})   
+        else
+                quota_output=$(${QUOTA} -v --raw-grace --user ${user} --show-mntpoint --hide-device 2> /dev/null | grep ${MOUNT_PATH})
+        fi
+
+        if [[ -z "$quota_output" ]] ; then continue ; fi
 
 	while read line
 	do
@@ -162,6 +174,14 @@ function get_lustre_quota()
 			files_grace=0
 		else
 			files_grace=$(calculate_seconds ${files_grace})
+		fi
+
+		if [[ $blocks_grace == "none" ]] ; then
+			blocks_grace=-1
+		fi
+
+		if [[ $files_grace == "none" ]] ; then
+			files_grace=-1
 		fi
 
 		echo "node_user_storage_quota_blocks_used{user=\"${user}\", fs_type=\"${FS_TYPE}\", mount_path=\"${MOUNT_PATH}\"}" $kbs_used >> ${OUTPUT}
